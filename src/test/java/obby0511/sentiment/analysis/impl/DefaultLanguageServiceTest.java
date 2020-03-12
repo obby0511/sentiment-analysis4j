@@ -79,6 +79,18 @@ class DefaultLanguageServiceTest {
             assertThat(response.getScore()).isEqualTo(0.0f);
             assertThat(response.getMagnitude()).isEqualTo(0.0f);
         }
+
+        @Test
+        void should_analyze_unnormalized_text() {
+            var request = LanguageRequest.builder()
+                    .text("ＯＫ is positive.")
+                    .encodingType(StandardCharsets.UTF_8)
+                    .build();
+            var response = service.analyzeSentiment(request);
+            assertThat(response).isNotNull();
+            assertThat(response.getScore()).isEqualTo(1.0f);
+            assertThat(response.getMagnitude()).isEqualTo(1.0f);
+        }
     }
 
     @Nested
@@ -111,6 +123,13 @@ class DefaultLanguageServiceTest {
             assertThat(mapToEntry.apply(new String[]{"NG", "n"})).isEqualTo(entry("NG", -1.0f));
             assertThat(mapToEntry.apply(new String[]{"NONE", "e"})).isEqualTo(entry("NONE", 0.0f));
             assertThat(mapToEntry.apply(new String[]{"ERROR", "z"})).isEqualTo(entry("ERROR", 0.0f));
+        }
+
+        @Test
+        void should_returns_normalized_entry() {
+            assertThat(mapToEntry.apply(new String[]{"ＯＫ", "e"})).isEqualTo(entry("OK", 0.0f));
+            assertThat(mapToEntry.apply(new String[]{"ｱｲｳｴｵ", "e"})).isEqualTo(entry("アイウエオ", 0.0f));
+            assertThat(mapToEntry.apply(new String[]{"①②③④⑤⑥⑦⑧⑨⑩", "e"})).isEqualTo(entry("12345678910", 0.0f));
         }
     }
 }

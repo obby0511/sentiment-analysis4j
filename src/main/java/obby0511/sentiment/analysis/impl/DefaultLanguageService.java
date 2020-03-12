@@ -9,6 +9,7 @@ import obby0511.sentiment.analysis.LanguageServiceException;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.text.Normalizer;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collections;
 import java.util.Map;
@@ -32,7 +33,8 @@ public class DefaultLanguageService implements LanguageService {
     @Override
     public LanguageResponse analyzeSentiment(final LanguageRequest request) {
         try {
-            final var score = tokenizer.tokenize(request.getText()).parallelStream()
+            var text = normalize(request.getText());
+            final var score = tokenizer.tokenize(text).parallelStream()
                     .map(Token::getSurface)
                     .mapToDouble(s -> scores.getOrDefault(s, 0f))
                     .sum();
@@ -41,6 +43,10 @@ public class DefaultLanguageService implements LanguageService {
         } catch (Exception e) {
             throw new LanguageServiceException(e.getMessage(), e);
         }
+    }
+
+    static String normalize(String text) {
+        return Normalizer.normalize(text, Normalizer.Form.NFKC);
     }
 
     static Map<String, Float> loadDictionary(final String dictionary) {
@@ -57,7 +63,7 @@ public class DefaultLanguageService implements LanguageService {
     }
 
     static Function<String[], Entry<String, Float>> mapToEntry = strings -> {
-        final var word = strings[0].trim();
+        final var word = normalize(strings[0].trim());
         final var sentiment = strings[1].trim(); // [p|e|n]
         final var score = sentiment.equals("p") ? 1
                 : sentiment.equals("n") ? -1
