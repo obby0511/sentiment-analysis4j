@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class DefaultLanguageService implements LanguageService {
+    private final Tokenizer tokenizer = new Tokenizer.Builder().build();
     private final Map<String, Float> scores;
 
     public DefaultLanguageService() {
@@ -31,7 +32,6 @@ public class DefaultLanguageService implements LanguageService {
     @Override
     public LanguageResponse analyzeSentiment(final LanguageRequest request) {
         try {
-            var tokenizer = new Tokenizer.Builder().build();
             final var score = tokenizer.tokenize(request.getText()).parallelStream()
                     .map(Token::getSurface)
                     .mapToDouble(s -> scores.getOrDefault(s, 0f))
