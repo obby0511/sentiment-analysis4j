@@ -51,7 +51,7 @@
         <repository>
             <id>github</id>
             <name>GitHub OWNER Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/satoshiyamamoto/sentiment-analysis4j</url>
+            <url>https://maven.pkg.github.com/${env.GITHUB_ACTOR}/sentiment-analysis4j</url>
         </repository>
     </distributionManagement>
 </project>
